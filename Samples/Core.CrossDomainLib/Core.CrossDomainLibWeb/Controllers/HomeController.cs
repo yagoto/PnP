@@ -50,6 +50,12 @@ namespace Core.CrossDomainLib.Controllers
         {
             //This action is called by the "view with post" sample. On load of the library, this code is called to get html and javascript to render the gray form on the SharePoint page.
             ViewBag.ServerUrl = "https://" + this.Request.Url.Authority;
+
+            string id = "dummy";
+            var userName = GetCurrentUsername();  //a call to SharePoint is made to get username
+            var user = string.Format("Id passed to function is {0}. Current user fetched by C# CSOM on server: {1}.", id, userName);
+
+
             return View();
         }
 
