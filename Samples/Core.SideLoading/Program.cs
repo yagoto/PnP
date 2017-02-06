@@ -32,6 +32,14 @@ namespace Core.SideLoading
             // Get path to the location of the app file in file system
             string path = GetUserInput("Please provide full path to your app package: \n");
 
+
+
+            url = "https://sbtwf2.sharepoint.com/sites/OpSite/Top/";
+            userName = "admin@sbtwf2.onmicrosoft.com";
+            path = @"C:\Users\yagoto\Source\Repos\WfLab\SpAddin1\SpAddin1\bin\Debug\app.publish\1.0.6.6\SpAddin1.app";
+
+
+
             // Create context for SharePoint online
             ClientContext ctx = new ClientContext(url);
             ctx.AuthenticationMode = ClientAuthenticationMode.Default;
@@ -48,11 +56,40 @@ namespace Core.SideLoading
                 site.ActivateFeature(sideloadingFeature);
                 try
                 {
-                    // Load .app file and install that to site
-                    var appstream = System.IO.File.OpenRead(path);
-                    AppInstance app = web.LoadAndInstallApp(appstream);
-                    ctx.Load(app);
-                    ctx.ExecuteQuery();
+                    bool isInstall = false;
+
+                    if (isInstall)
+                    {
+                        // Load .app file and install that to site
+                        var appstream = System.IO.File.OpenRead(path);
+                        AppInstance app = web.LoadAndInstallApp(appstream);
+                        ctx.Load(app);
+                        ctx.ExecuteQuery();
+                        Console.WriteLine("installed success.");
+                    }
+                    else
+                    {
+                        var appstream = System.IO.File.OpenRead(path);
+
+                        var productId = new Guid("6C31CD20-2ECA-468E-A4E0-4E7A994F8BC6");
+
+                        //var apps = web.GetAppInstances();
+
+                        var apps = web.GetAppInstancesByProductId(productId);
+                        ctx.Load(apps);
+                        ctx.ExecuteQuery();
+
+                        if (apps.Any())
+                        {
+                            AppInstance app = apps.First();
+                            app.Upgrade(appstream);
+
+                            ctx.Load(app);
+                            ctx.ExecuteQuery();
+                            Console.WriteLine("upgrade success. status = " + app.Status.ToString());
+
+                        }
+                    }
                 }
                 catch
                 {
@@ -78,6 +115,10 @@ namespace Core.SideLoading
         /// <returns></returns>
         public static string GetUserInput(string message)
         {
+            // TODO:後で消すこと。
+            return "";
+
+
             string path = string.Empty;
             Console.Write(message);
             path = Console.ReadLine();
